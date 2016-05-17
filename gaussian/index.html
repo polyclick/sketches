@@ -1,0 +1,459 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js webgl - postprocessing</title>
+    <meta charset="utf-8">
+    <style>
+      body {
+        margin: 0px;
+        background-color: #000000;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+
+    <script type="text/javascript" src="scripts/vendor/threejs/build/three.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+
+    <script type="text/javascript" src="scripts/vendor/statsjs/stats.min.js"></script>
+
+    <script src="scripts/vendor/threejs/plugins/shaders/CopyShader.js"></script>
+    <script src="scripts/vendor/threejs/plugins/shaders/VignetteShader.js"></script>
+    <script src="scripts/vendor/threejs/plugins/shaders/HorizontalBlurShader.js"></script>
+    <script src="scripts/vendor/threejs/plugins/shaders/VerticalBlurShader.js"></script>
+
+    <script src="scripts/vendor/threejs/plugins/postprocessing/EffectComposer.js"></script>
+    <script src="scripts/vendor/threejs/plugins/postprocessing/RenderPass.js"></script>
+    <script src="scripts/vendor/threejs/plugins/postprocessing/MaskPass.js"></script>
+    <script src="scripts/vendor/threejs/plugins/postprocessing/ShaderPass.js"></script>
+
+
+    <script>
+
+      var camera, scene, light, renderer, composer;
+      var group;
+
+      var _vignettePass;
+      var _horizontalBlurFirstPass, _verticalBlurFirstPass;
+      var _horizontalBlurSecondPass, _verticalBlurSecondPass;
+      var _horizontalBlurThirdPass, _verticalBlurThirdPass;
+
+      // Colors
+      var _colors;
+
+      var _extrudeSettings = {
+        amount:20,
+        bevelEnabled:true,
+        bevelSegments:2,
+        steps:2,
+        bevelSize:8
+      };
+
+      // GUI
+      var _guiParams = {
+        backgroundColor:0x541278,
+        color1:0x208dbb,
+        color2:0xff0096,
+        color3:0xa800ff,
+
+        vignettePassEnabled:true,
+        vignetteOffset:0.7,
+        vignetteDarkness:2.8,
+
+        firstPassEnabled:true,
+        secondPassEnabled:true,
+        thirdPassEnabled:true,
+
+        firstPassRadius:24,
+        secondPassRadius:16,
+        thirdPassRadius:10
+      }
+
+      init();
+      gui();
+      animate();
+
+
+
+
+
+      function init()
+      {
+        // Renderer
+        renderer = new THREE.WebGLRenderer();
+        renderer.setClearColor(_guiParams.backgroundColor);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        document.body.appendChild(renderer.domElement);
+
+
+        // Camera
+        camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 1, 1000);
+        camera.position.z = 100;
+
+
+        // Scene
+        scene = new THREE.Scene();
+        //scene.fog = new THREE.Fog(0x000000, 1, 1000);
+
+
+        // Light
+        light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position = camera.position;
+        scene.add(light);
+
+
+        // Post processing
+        // Add render pass
+        composer = new THREE.EffectComposer(renderer);
+        composer.addPass(new THREE.RenderPass(scene, camera));
+
+        // Add vignette pass
+        _vignettePass = new THREE.ShaderPass(THREE.VignetteShader);
+        _vignettePass.enabled = _guiParams.vignettePassEnabled;
+        _vignettePass.uniforms["offset"].value = _guiParams.vignetteOffset;
+        _vignettePass.uniforms["darkness"].value = _guiParams.vignetteDarkness;
+        composer.addPass(_vignettePass);
+
+        // Add gaussian pass 1 (horizontal)
+        _horizontalBlurFirstPass = new THREE.ShaderPass(THREE.HorizontalBlurShader);
+        _horizontalBlurFirstPass.enabled = _guiParams.firstPassEnabled;
+        _horizontalBlurFirstPass.uniforms["h"].value = _guiParams.firstPassRadius / window.innerWidth;
+        composer.addPass(_horizontalBlurFirstPass);
+
+        // Add gaussian pass 1 (vertical)
+        _verticalBlurFirstPass = new THREE.ShaderPass(THREE.VerticalBlurShader);
+        _verticalBlurFirstPass.enabled = _guiParams.firstPassEnabled;
+        _verticalBlurFirstPass.uniforms["v"].value = _guiParams.firstPassRadius / window.innerHeight;
+        composer.addPass(_verticalBlurFirstPass);
+
+        // Add gaussian pass 2 (horizontal)
+        _horizontalBlurSecondPass = new THREE.ShaderPass(THREE.HorizontalBlurShader);
+        _horizontalBlurSecondPass.enabled = _guiParams.secondPassEnabled;
+        _horizontalBlurSecondPass.uniforms["h"].value = _guiParams.secondPassRadius / window.innerWidth;
+        composer.addPass(_horizontalBlurSecondPass);
+
+        // Add gaussian pass 2 (vertical)
+        _verticalBlurSecondPass = new THREE.ShaderPass(THREE.VerticalBlurShader);
+        _verticalBlurSecondPass.enabled = _guiParams.secondPassEnabled;
+        _verticalBlurSecondPass.uniforms["v"].value = _guiParams.secondPassRadius / window.innerHeight;
+        composer.addPass(_verticalBlurSecondPass);
+
+        // Add gaussian pass 3 (horizontal)
+        _horizontalBlurThirdPass = new THREE.ShaderPass(THREE.HorizontalBlurShader);
+        _horizontalBlurThirdPass.enabled = _guiParams.thirdPassEnabled;
+        _horizontalBlurThirdPass.uniforms["h"].value = _guiParams.thirdPassRadius / window.innerWidth;
+        composer.addPass(_horizontalBlurThirdPass);
+
+        // Add gaussian pass 3 (vertical)
+        _verticalBlurThirdPass = new THREE.ShaderPass(THREE.VerticalBlurShader);
+        _verticalBlurThirdPass.enabled = _guiParams.thirdPassEnabled;
+        _verticalBlurThirdPass.uniforms["v"].value = _guiParams.thirdPassRadius / window.innerHeight;
+        composer.addPass(_verticalBlurThirdPass);
+
+        // Add copy pass
+        var _copyPass = new THREE.ShaderPass(THREE.CopyShader)
+        _copyPass.renderToScreen = true;
+        composer.addPass(_copyPass);
+
+
+        window.addEventListener('resize', onWindowResize, false);
+
+
+        createObjects();
+      }
+
+
+
+      function createObjects()
+      {
+        // First remove group
+        if(group) scene.remove(group);
+
+        // Kill all tweens
+        TweenMax.killAll(false, true, false);
+
+        // Set colors
+        _colors = [_guiParams.color1, _guiParams.color2, _guiParams.color3];
+
+        // Create group
+        group = new THREE.Object3D();
+
+        // Add meshes to group & start animation
+        for(var i = 0 ; i < 15 ; i++)
+        {
+          var x = (Math.random() * 200) - 120;
+          var y = (Math.random() * 200) - 120;
+
+          var scale = 0.5 + Math.random();
+          var rotation = Math.random() * 360 * Math.PI / 180;
+
+          var mesh = createMeshWithShape(createRandomShape(), _extrudeSettings, _colors[i % _colors.length], x, y, 0, 0, 0, rotation, scale);
+          group.add(mesh);
+
+          animateMesh(mesh, i);
+        }
+
+        // Add object to group
+        scene.add(group);
+      }
+
+
+
+      function gui()
+      {
+        // Stats
+        var _stats = new Stats();
+        _stats.domElement.style.position = 'absolute';
+        _stats.domElement.style.left = '0px';
+        _stats.domElement.style.top = '0px';
+        _stats.setMode(1);
+
+        //document.body.appendChild(_stats.domElement);
+
+
+
+
+
+        var _gui = new dat.GUI();
+        //dat.GUI.toggleHide();
+
+        // Folders
+        var postFolder = _gui.addFolder('Settings');
+        var colorFolder = postFolder.addFolder('Colors');
+        var vignetteFolder = postFolder.addFolder('Vignette');
+        var firstBlurFolder = postFolder.addFolder('1st Blur Pass');
+        var secondBlurFolder = postFolder.addFolder('2nd Blur Pass');
+        var thirdBlurFolder = postFolder.addFolder('3rd Blur Pass');
+
+
+        // Colors
+        colorFolder.addColor(_guiParams, 'backgroundColor').name('Background Color').onChange(function(value){ renderer.setClearColor(value); });
+        colorFolder.addColor(_guiParams, 'color1').name('Color 1').onChange(function(value){ createObjects(); });
+        colorFolder.addColor(_guiParams, 'color2').name('Color 2').onChange(function(value){ createObjects(); });
+        colorFolder.addColor(_guiParams, 'color3').name('Color 3').onChange(function(value){ createObjects(); });
+
+
+        // Vignette
+        vignetteFolder.add(_vignettePass, 'enabled').name('Enabled');
+        vignetteFolder.add(_guiParams, 'vignetteOffset', 0, 4).name('Offset').onChange(function(value){ _vignettePass.uniforms["offset"].value = value; });
+        vignetteFolder.add(_guiParams, 'vignetteDarkness', 0, 4).name('Darkness').onChange(function(value){ _vignettePass.uniforms["darkness"].value = value; });
+
+
+        // First blur pass
+        firstBlurFolder.add(_guiParams, 'firstPassEnabled').name('Enabled').onChange(function(value){
+          _horizontalBlurFirstPass.enabled = value;
+          _verticalBlurFirstPass.enabled = value;
+        });
+
+        firstBlurFolder.add(_guiParams, 'firstPassRadius', 1, 24).step(1).name('Radius').onChange(function(value){
+          _horizontalBlurFirstPass.uniforms["h"].value = value / window.innerWidth;
+          _verticalBlurFirstPass.uniforms["v"].value = value / window.innerHeight;
+        });
+
+
+        // Second blur pass
+        secondBlurFolder.add(_guiParams, 'secondPassEnabled').name('Enabled').onChange(function(value){
+          _horizontalBlurSecondPass.enabled = value;
+          _verticalBlurSecondPass.enabled = value;
+        });
+
+        secondBlurFolder.add(_guiParams, 'secondPassRadius', 1, 24).step(1).name('Radius').onChange(function(value){
+          _horizontalBlurSecondPass.uniforms["h"].value = value / window.innerWidth;
+          _verticalBlurSecondPass.uniforms["v"].value = value / window.innerHeight;
+        });
+
+
+        // Third blur pass
+        thirdBlurFolder.add(_guiParams, 'thirdPassEnabled').name('Enabled').onChange(function(value){
+          _horizontalBlurThirdPass.enabled = value;
+          _verticalBlurThirdPass.enabled = value;
+        });
+
+        thirdBlurFolder.add(_guiParams, 'thirdPassRadius', 1, 24).step(1).name('Radius').onChange(function(value){
+          _horizontalBlurThirdPass.uniforms["h"].value = value / window.innerWidth;
+          _verticalBlurThirdPass.uniforms["v"].value = value / window.innerHeight;
+        });
+
+        colorFolder.open();
+        postFolder.open();
+      }
+
+
+
+      function onWindowResize()
+      {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+
+
+      function animate()
+      {
+        requestAnimationFrame(animate);
+        composer.render();
+      }
+
+
+
+      function animateMesh(mesh, delay)
+      {
+        var newX = (Math.random() * 200) - 120;
+        var newY = (Math.random() * 200) - 120;
+
+        TweenMax.to(mesh.position, 20 + (Math.random() * 5), {delay:delay, x:newX, y:newY, ease:Linear.easeNone, onComplete:animateMesh, onCompleteParams:[mesh, 0]});
+      }
+
+
+
+      function createRandomShape()
+      {
+        var shapeCreationFunctions = [
+          createHeartShape,
+          createTriangleShape,
+          createFishShape,
+          createCircleShape,
+          createSquareShape
+        ]
+
+        var createFunction = shapeCreationFunctions[Math.floor(Math.random() * shapeCreationFunctions.length)];
+
+        return createFunction();
+      }
+
+
+
+      function createTriangleShape()
+      {
+        var triangleShape = new THREE.Shape();
+        triangleShape.moveTo(80, 20);
+        triangleShape.lineTo(40, 80);
+        triangleShape.lineTo(120, 80);
+        triangleShape.lineTo(80, 20);
+
+        return triangleShape;
+      }
+
+
+
+      function createHeartShape()
+      {
+        var x = 0, y = 0;
+
+        var heartShape = new THREE.Shape();
+        heartShape.moveTo(x + 25, y + 25 );
+        heartShape.bezierCurveTo(x + 25, y + 25, x + 20, y, x, y);
+        heartShape.bezierCurveTo(x - 30, y, x - 30, y + 35,x - 30,y + 35);
+        heartShape.bezierCurveTo(x - 30, y + 55, x - 10, y + 77, x + 25, y + 95);
+        heartShape.bezierCurveTo(x + 60, y + 77, x + 80, y + 55, x + 80, y + 35);
+        heartShape.bezierCurveTo(x + 80, y + 35, x + 80, y, x + 50, y);
+        heartShape.bezierCurveTo(x + 35, y, x + 25, y + 25, x + 25, y + 25);
+
+        return heartShape
+      }
+
+
+
+      function createSquareShape()
+      {
+        var sqLength = 80;
+
+        var squareShape = new THREE.Shape();
+        squareShape.moveTo(0, 0);
+        squareShape.lineTo(0, sqLength);
+        squareShape.lineTo(sqLength, sqLength);
+        squareShape.lineTo(sqLength, 0);
+        squareShape.lineTo(0, 0);
+
+        return squareShape;
+      }
+
+
+
+      function createRectangleShape()
+      {
+        var rectLength = 120, rectWidth = 40;
+
+        var rectShape = new THREE.Shape();
+        rectShape.moveTo(0,0);
+        rectShape.lineTo(0, rectWidth);
+        rectShape.lineTo(rectLength, rectWidth);
+        rectShape.lineTo(rectLength, 0);
+        rectShape.lineTo(0, 0);
+
+        return rectShape;
+      }
+
+
+
+      function createCircleShape()
+      {
+        var circleRadius = 40;
+
+        var circleShape = new THREE.Shape();
+        circleShape.moveTo(0, circleRadius);
+        circleShape.quadraticCurveTo(circleRadius, circleRadius, circleRadius, 0);
+        circleShape.quadraticCurveTo(circleRadius, -circleRadius, 0, -circleRadius);
+        circleShape.quadraticCurveTo(-circleRadius, -circleRadius, -circleRadius, 0);
+        circleShape.quadraticCurveTo(-circleRadius, circleRadius, 0, circleRadius);
+
+        return circleShape;
+      }
+
+
+
+      function createFishShape()
+      {
+        var x = 0, y = 0;
+
+        var fishShape = new THREE.Shape();
+        fishShape.moveTo(x,y);
+        fishShape.quadraticCurveTo(x + 50, y - 80, x + 90, y - 10);
+        fishShape.quadraticCurveTo(x + 100, y - 10, x + 115, y - 40);
+        fishShape.quadraticCurveTo(x + 115, y, x + 115, y + 40);
+        fishShape.quadraticCurveTo(x + 100, y + 10, x + 90, y + 10);
+        fishShape.quadraticCurveTo(x + 50, y + 80, x, y);
+
+        return fishShape;
+      }
+
+
+
+      function createArcShape()
+      {
+        var arcShape = new THREE.Shape();
+        arcShape.moveTo(50, 10);
+        arcShape.absarc(10, 10, 40, 0, Math.PI * 2, false);
+
+        var holePath = new THREE.Path();
+        holePath.moveTo(20, 10);
+        holePath.absarc(10, 10, 10, 0, Math.PI * 2, true);
+        arcShape.holes.push(holePath);
+
+        return arcShape;
+      }
+
+
+
+      function createMeshWithShape(shape, extrudeSettings, color, x, y, z, rx, ry, rz, s)
+      {
+        var geometry = new THREE.ShapeGeometry(shape);
+
+        var mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({color:color}));
+        mesh.position.set(x, y, z);
+        mesh.rotation.set(rx, ry, rz);
+        mesh.scale.set(s, s, s);
+
+        return mesh;
+      }
+
+    </script>
+
+  </body>
+</html>

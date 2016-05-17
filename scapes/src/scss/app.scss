@@ -1,0 +1,36 @@
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  // scss-lint:disable ImportantRule
+  background-color: #000000;
+  -webkit-font-smoothing: antialiased !important;
+  font-smoothing: subpixel-antialiased;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  text-rendering: optimizeLegibility !important;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, .004);
+}
+
+.title {
+  color: #000;
+  font-family: 'sofia-pro';
+  left: 50%;
+  pointer-events: none;
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20vh;
+  line-height: 1.0;
+  user-select: none;
+}
+
+.subtext {
+  font-size: 40px;
+  display: none;
+}
