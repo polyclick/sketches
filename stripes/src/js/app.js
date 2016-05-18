@@ -7,6 +7,8 @@ import TweenMax from 'gsap'
 import THREE from 'three'
 window.THREE = THREE
 
+import './utils.js'
+
 class App {
   constructor() {
     this.canvas = null
@@ -27,8 +29,8 @@ class App {
     this.canvas = document.getElementById('canvas')
 
     // renderer
-    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true })
-    this.renderer.setPixelRatio(window.devicePixelRatio)
+    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: false })
+    //this.renderer.setPixelRatio(window.devicePixelRatio)
     this.renderer.setSize(this.sceneWidth, this.sceneHeight)
 
     // camera
@@ -43,7 +45,7 @@ class App {
 
     // sweep every 4 seconds
     this.sweep()
-    setInterval(() => { this.sweep() }, 4000)
+    setInterval(() => { this.sweep() }, 5000)
 
     // render & animation ticker
     TweenMax.ticker.fps(60)
@@ -60,19 +62,19 @@ class App {
     this.meshes = []
 
     // params to create meshes
-    let count = 100
-    let colors = ['#FDF000', '#00AB75']
+    let count = 250
+    let colors = ['#FF5D48', '#4DFFAE']
     let sizes = [10, 50, 100, 135, 185]
 
     // create them
     for(let i = 0 ; i < count ; i++) {
 
       // pick random color but biased to #ffffff
-      let color = Math.random() > 0.8 ? colors[Math.round(Math.random())] : '#ffffff'
+      let color = Math.random() > 0.85 ? randomFromArray(colors) : '#ffffff'
 
       // geometry
-      let geometry = new THREE.CylinderGeometry(1, 1, sizes[Math.round(Math.random() * (sizes.length - 1))], 16)
-      let material = new THREE.MeshBasicMaterial({ color: color, wireframe:true })
+      let geometry = new THREE.CylinderGeometry(1, 1, randomFromArray(sizes), 8)
+      let material = new THREE.MeshBasicMaterial({ color: color, wireframe:false })
 
       // position everything
       let mesh = new THREE.Mesh(geometry, material)
@@ -86,11 +88,10 @@ class App {
   }
 
   sweep() {
-    let times = [1.0, 2.0, 3.0]
+    let frustrum = frustrumSizeForCamera(this.camera, this.sceneWidth, this.sceneHeight)
     _.each(this.meshes, (mesh) => {
-      let randomTime = times[Math.round(Math.random() * (times.length - 1))]
-      mesh.position.set(-this.sceneWidth / 3, (Math.random() * this.sceneHeight / 2) - (this.sceneHeight / 4), 0)
-      TweenMax.to(mesh.position, randomTime + (Math.random() * 1.0), {x: this.sceneWidth / 3, ease: Linear.easeNone})
+      mesh.position.set(-((frustrum.width / 2) + randomBetween(100, 400)), randomBetween(-frustrum.height / 2, frustrum.height / 2), 0)
+      TweenMax.to(mesh.position, randomBetween(2.5, 4.0), {x: ((frustrum.width / 2) + randomBetween(100, 400)), ease: Linear.easeNone})
     })
   }
 
