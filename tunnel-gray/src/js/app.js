@@ -40,10 +40,10 @@ class App {
     this.clock = new THREE.Clock()
 
     // renderer
-    this.renderer = new THREE.WebGLRenderer({ canvas: this.$canvas[0], antialias: true, preserveDrawingBuffer: true })
-    this.renderer.setPixelRatio(window.devicePixelRatio)
+    this.renderer = new THREE.WebGLRenderer({ canvas: this.$canvas[0], antialias: false, preserveDrawingBuffer: true })
+    //this.renderer.setPixelRatio(window.devicePixelRatio)
     this.renderer.setSize(this.sceneWidth, this.sceneHeight)
-    this.renderer.autoClearColor = false;
+    this.renderer.autoClearColor = true;
 
     // camera
     this.camera = new THREE.PerspectiveCamera(70, this.sceneWidth / this.sceneHeight, 1, 1000)
