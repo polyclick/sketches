@@ -7,13 +7,7 @@ import TweenMax from 'gsap'
 import THREE from 'three'
 window.THREE = THREE
 
-import ConvolutionShader from 'three/shaders/ConvolutionShader'
-import CopyShader from 'three/shaders/CopyShader'
-import EffectComposer from 'three/postprocessing/EffectComposer'
-import MaskPass from 'three/postprocessing/MaskPass'
-import RenderPass from 'three/postprocessing/RenderPass'
-import ShaderPass from 'three/postprocessing/ShaderPass'
-import BloomPass from 'three/postprocessing/BloomPass'
+import './utils.js'
 
 class App {
   constructor() {
@@ -21,8 +15,6 @@ class App {
     this.clock = null
     this.renderer = null
     this.camera = null
-    this.composer = null
-    this.renderPass = null
 
     this.scene = null
     this.meshes = null
@@ -47,42 +39,19 @@ class App {
     this.clock = new THREE.Clock()
 
     // renderer
-    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true })
-    this.renderer.setPixelRatio(window.devicePixelRatio)
+    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: false })
+    //this.renderer.setPixelRatio(window.devicePixelRatio)
     this.renderer.setSize(this.screenWidth, this.screenHeight)
 
     // camera
     this.camera = new THREE.PerspectiveCamera(70, this.screenWidth / this.screenHeight, 1, 1000)
     this.camera.position.z = 500
 
-
-
     // scene
     this.scene = new THREE.Scene()
 
     // create world
     this.createWorld();
-
-
-
-    // composer
-    this.composer = new THREE.EffectComposer(this.renderer)
-
-    // render pass, will render the scene from the camera perspective to the framebuffer
-    let renderPass = new THREE.RenderPass(this.scene, this.camera)
-    this.composer.addPass(renderPass)
-
-    // adds a bloom to the previous pass
-    let bloomPass = new THREE.BloomPass(5, 50, 1.25, 512)
-    bloomPass.enabled = true;
-    this.composer.addPass(bloomPass)
-
-    // copies the previous pass and sets it as the end of the post processing filter chain
-    let effectCopy = new THREE.ShaderPass(THREE.CopyShader);
-    effectCopy.renderToScreen = true;
-    this.composer.addPass(effectCopy);
-
-
 
     // render & animation ticker
     TweenMax.ticker.fps(60)
@@ -92,10 +61,11 @@ class App {
     this.resizeHandler()
     $(window).resize(() => { this.resizeHandler() })
 
-
-
     // sweep
     this.sweep()
+
+    // fade out overlay
+    TweenMax.to($('#overlay'), 2.0, {delay: 1.0, opacity: 0});
   }
 
   createWorld() {
@@ -104,18 +74,18 @@ class App {
     this.meshes = []
 
     // params to create meshes
-    let count = 200
-    let colors = ['#FDF000', '#00AB75']
+    let count = 350
+    let colors = ['#FFE748', '#864DFF']
     let sizes = [10, 50, 100, 135, 185]
 
     // create them
     for(let i = 0 ; i < count ; i++) {
 
       // pick random color but biased to #ffffff
-      let color = Math.random() > 0.9 ? colors[Math.round(Math.random())] : '#999999'
+      let color = Math.random() > 0.8 ? colors[Math.round(Math.random())] : '#ffffff'
 
       // geometry
-      let geometry = new THREE.CylinderGeometry(1, 1, sizes[Math.round(Math.random() * (sizes.length - 1))], 4)
+      let geometry = new THREE.CylinderGeometry(1, 1, randomFromArray(sizes), 4)
       let material = new THREE.MeshBasicMaterial({ color: color, wireframe:false, blending: THREE.AdditiveBlending })
 
       // position everything
@@ -131,33 +101,36 @@ class App {
 
   sweep() {
     _.each(this.meshes, (mesh) => {
-      this.sweepMesh(mesh)
+      this.sweepMesh(mesh, Math.random() * 3)
     })
   }
 
-  sweepMesh(mesh) {
-    let times = [1.0, 2.0, 3.0]
+  sweepMesh(mesh, delay) {
 
     // time to move
-    let time = times[Math.round(Math.random() * (times.length - 1))] + (Math.random() * 2.0)
+    let time = randomBetween(2.0, 5.0)
+
+    // frustrum
+    let frustrum = frustrumSizeForCamera(this.camera, this.screenWidth, this.screenHeight)
 
     // start & end position (x)
-    let startPosition = this.visibleRectWidthHalf + 200.0
-    let endPosition = -this.visibleRectWidthHalf - 200.0
+    let xPosition = (frustrum.width / 2) + 200.0
+    let xPositionEnd = (frustrum.width / -2) - 200.0
 
-    // random y distribution
-    let yDistribution = (Math.random() * this.visibleRectHeight) - this.visibleRectHeightHalf
-
-    let endYDistribution = false ? yDistribution : (Math.random() * this.visibleRectHeight) - this.visibleRectHeightHalf
+    // y distribution (add some banding)
+    let banding = frustrum.height * 0.25
+    let yPosition = randomBetween((frustrum.height / -2) - banding, (frustrum.height / 2) + banding)
+    let yPositionEnd = randomBetween((frustrum.height / -2) - banding, (frustrum.height / 2) + banding)
 
     // initial position & animate
-    mesh.position.set(startPosition, yDistribution, 0)
+    mesh.position.set(xPosition, yPosition, 0)
     TweenMax.to(mesh.position, time, {
-      x: endPosition,
-      y: endYDistribution,
-      ease: Power1.easeInOut,
+      delay: delay,
+      x: xPositionEnd,
+      y: yPositionEnd,
+      ease: Linear.easeNone,
       onComplete: () => {
-        this.sweepMesh(mesh)
+        this.sweepMesh(mesh, 0)
       }
     })
   }
@@ -172,9 +145,8 @@ class App {
   }
 
   render() {
-    //this.renderer.render(this.scene, this.camera)
+    this.renderer.render(this.scene, this.camera)
     let delta = this.clock.getDelta()
-    this.composer.render(delta)
   }
 
   resizeHandler() {
