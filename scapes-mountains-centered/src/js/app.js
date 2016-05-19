@@ -16,6 +16,8 @@ import RenderPass from 'three/postprocessing/RenderPass'
 import ShaderPass from 'three/postprocessing/ShaderPass'
 import BloomPass from 'three/postprocessing/BloomPass'
 
+import './util.js'
+
 import { Landscape } from './landscape.js'
 import { Trail } from './trail.js'
 
@@ -56,7 +58,7 @@ class App {
     this.renderer.setClearColor(0x151432)
 
     // camera
-    this.camera = new THREE.PerspectiveCamera(100, this.sceneWidth / this.sceneHeight, 1, 1000)
+    this.camera = new THREE.PerspectiveCamera(90, this.sceneWidth / this.sceneHeight, 1, 1000)
     this.camera.position.z = 0
 
     // scene & world
@@ -97,13 +99,13 @@ class App {
     this.landscapeBottom = new Landscape()
     this.landscapeBottom.position.x = -100.0
     //this.landscapeBottom.position.y = -200.0
-    this.landscapeBottom.rotation.z = Math.PI / -2
+    this.landscapeBottom.rotation.z = degToRad(-90)
     this.scene.add(this.landscapeBottom)
 
     this.landscapeTop = new Landscape()
     this.landscapeTop.position.x = 100.0
     //this.landscapeTop.position.y = 200.0
-    this.landscapeTop.rotation.z = Math.PI / 2
+    this.landscapeTop.rotation.z = degToRad(90)
     this.scene.add(this.landscapeTop)
 
     this.trails = []
