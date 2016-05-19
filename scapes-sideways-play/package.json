@@ -91,6 +91,8 @@
       "test": "test"
     },
     "dependencies": {
+      "ccapture.js": "npm:ccapture.js@^1.0.3",
+      "dat-gui": "npm:dat-gui@^0.5.0",
       "gsap": "npm:gsap@^1.18.0",
       "jquery": "npm:jquery@^2.2.0",
       "lodash": "npm:lodash@^4.0.0",

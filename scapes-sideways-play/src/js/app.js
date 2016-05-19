@@ -1,6 +1,8 @@
 import $ from 'jquery'
 import _ from 'lodash'
 import TweenMax from 'gsap'
+import CCapture from 'ccapture.js'
+import dat from 'dat-gui'
 
 // import three and make it global
 // so plugins can hook onto the namespace THREE
@@ -21,6 +23,8 @@ class App {
     this.renderer = null
     this.camera = null
     this.scene = null
+    this.capturer = null
+    this.gui = null
 
     this.sceneWidth = window.innerWidth
     this.sceneHeight = window.innerHeight
@@ -52,8 +56,32 @@ class App {
     this.scene = new THREE.Scene()
     this.createWorld()
 
+    // capturer
+    this.capturer = new CCapture({
+      framerate: 60,
+      verbose: true,
+      format: 'webm'
+    })
+
+    // gui
+    let guiElements = {
+      start:() => { this.capturer.start() },
+      stop:() => { this.capturer.stop() },
+      save:() => { this.capturer.save() }
+    }
+
+    this.gui = new dat.GUI()
+    this.gui.add(guiElements, 'start')
+    this.gui.add(guiElements, 'stop')
+    this.gui.add(guiElements, 'save')
+
+
+
+
     // render & animation ticker
+    TweenMax.lagSmoothing(0)
     TweenMax.ticker.fps(60)
+    TweenMax.ticker.useRAF(false)
     TweenMax.ticker.addEventListener('tick', () => { this.tick() })
 
     // resize handler, resize once
@@ -100,6 +128,7 @@ class App {
   tick() {
     this.update()
     this.draw()
+    this.capture()
   }
 
   update() {
@@ -111,6 +140,10 @@ class App {
 
   draw() {
     this.renderer.render(this.scene, this.camera)
+  }
+
+  capture() {
+    this.capturer.capture(this.$canvas[0])
   }
 
   resize() {

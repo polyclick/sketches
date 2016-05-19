@@ -559,17 +559,19 @@ System.config({
   map: {
     "babel": "npm:babel-core@5.8.35",
     "babel-runtime": "npm:babel-runtime@5.8.35",
+    "ccapture.js": "npm:ccapture.js@1.0.3",
     "core-js": "npm:core-js@1.2.6",
+    "dat-gui": "npm:dat-gui@0.5.0",
     "gsap": "npm:gsap@1.18.0",
     "jquery": "npm:jquery@2.2.0",
     "lodash": "npm:lodash@4.0.0",
     "pixi.js": "npm:pixi.js@3.0.6",
     "three": "github:mrdoob/three.js@master",
     "github:jspm/nodelibs-assert@0.1.0": {
-      "assert": "npm:assert@1.3.0"
+      "assert": "npm:assert@1.4.0"
     },
     "github:jspm/nodelibs-buffer@0.1.0": {
-      "buffer": "npm:buffer@3.5.1"
+      "buffer": "npm:buffer@3.6.0"
     },
     "github:jspm/nodelibs-events@0.1.1": {
       "events": "npm:events@1.0.2"
@@ -578,7 +580,7 @@ System.config({
       "path-browserify": "npm:path-browserify@0.0.0"
     },
     "github:jspm/nodelibs-process@0.1.2": {
-      "process": "npm:process@0.11.2"
+      "process": "npm:process@0.11.3"
     },
     "github:jspm/nodelibs-punycode@0.1.0": {
       "punycode": "npm:punycode@1.3.2"
@@ -607,7 +609,11 @@ System.config({
       "path": "github:jspm/nodelibs-path@0.1.0",
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
-    "npm:assert@1.3.0": {
+    "npm:assert@1.4.0": {
+      "assert": "github:jspm/nodelibs-assert@0.1.0",
+      "buffer": "github:jspm/nodelibs-buffer@0.1.0",
+      "buffer-shims": "npm:buffer-shims@1.0.0",
+      "process": "github:jspm/nodelibs-process@0.1.2",
       "util": "npm:util@0.10.3"
     },
     "npm:async@0.9.2": {
@@ -628,10 +634,20 @@ System.config({
       "systemjs-json": "github:systemjs/plugin-json@0.1.0",
       "through2": "npm:through2@0.4.2"
     },
-    "npm:buffer@3.5.1": {
+    "npm:buffer-shims@1.0.0": {
+      "buffer": "github:jspm/nodelibs-buffer@0.1.0"
+    },
+    "npm:buffer@3.6.0": {
       "base64-js": "npm:base64-js@0.0.8",
+      "child_process": "github:jspm/nodelibs-child_process@0.1.0",
+      "fs": "github:jspm/nodelibs-fs@0.1.2",
       "ieee754": "npm:ieee754@1.1.6",
-      "is-array": "npm:is-array@1.0.1"
+      "isarray": "npm:isarray@1.0.0",
+      "process": "github:jspm/nodelibs-process@0.1.2"
+    },
+    "npm:ccapture.js@1.0.3": {
+      "buffer": "github:jspm/nodelibs-buffer@0.1.0",
+      "process": "github:jspm/nodelibs-process@0.1.2"
     },
     "npm:concat-stream@1.4.8": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
@@ -712,7 +728,7 @@ System.config({
       "systemjs-json": "github:systemjs/plugin-json@0.1.0",
       "url": "github:jspm/nodelibs-url@0.1.0"
     },
-    "npm:process@0.11.2": {
+    "npm:process@0.11.3": {
       "assert": "github:jspm/nodelibs-assert@0.1.0"
     },
     "npm:punycode@1.3.2": {
