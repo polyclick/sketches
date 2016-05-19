@@ -37,8 +37,8 @@ class App {
     this.clock = new THREE.Clock()
 
     // renderer
-    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true })
-    this.renderer.setPixelRatio(window.devicePixelRatio)
+    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: false })
+    //this.renderer.setPixelRatio(window.devicePixelRatio)
     this.renderer.setSize(this.screenWidth, this.screenHeight)
 
     // camera
