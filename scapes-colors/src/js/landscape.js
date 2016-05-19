@@ -26,7 +26,7 @@ export class Landscape {
       })
     })
 
-    this.animateToColor(1)
+    //this.animateToColor(1)
   }
 
   createMeshes(blueprint) {
@@ -34,7 +34,7 @@ export class Landscape {
     this.meshes = []
 
     // material
-    let material = new THREE.MeshBasicMaterial({ color: '#ffffff', wireframe: true })
+    let material = new THREE.MeshBasicMaterial({ color: '#FF5449', wireframe: true, wireframeLinewidth:2 })
 
     // primary mesh
     let primary = new THREE.Mesh(blueprint.geometry, material)
@@ -68,7 +68,7 @@ export class Landscape {
       _.each(this.meshes, (mesh) => {
         mesh.position.z += 2
 
-        mesh.material.color.setHSL(this.color.h / 360, this.color.s / 100, this.color.l / 100)
+        //mesh.material.color.setHSL(this.color.h / 360, this.color.s / 100, this.color.l / 100)
 
         if(mesh.position.z > 500) {
           mesh.position.z = -1500
