@@ -97,7 +97,7 @@ export class Landscape extends THREE.Object3D {
     let colors = [0xB13254, 0xFF5449, 0xFF7349, 0xFF9249]
     if(this.objects && this.objects.length) {
       _.each(this.objects, (object) => {
-        object.position.z += 2
+        object.position.z += 1
 
         // object.material.color.setHSL(this.color.h / 360, this.color.s / 100, this.color.l / 100)
 

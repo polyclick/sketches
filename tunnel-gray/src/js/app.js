@@ -9,8 +9,8 @@ window.THREE = THREE
 
 import 'three/loaders/OBJLoader'
 
+import './util.js'
 import { Landscape } from './landscape.js'
-import { Trail } from './trail.js'
 
 // application
 class App {
@@ -64,7 +64,6 @@ class App {
     // mouse handlers
     $(document).mousedown(() => { this.mousedown() })
     $(document).mouseup(() => { this.mouseup() })
-    $(document).mousemove((event) => { this.mousemove(event) })
   }
 
   createWorld() {
@@ -81,9 +80,9 @@ class App {
   update() {
     if(this.landscapeBottom) this.landscapeBottom.update()
 
-    this.camera.position.x = 3.0 + (-Math.sin(this.clock.getElapsedTime()) * 3.0)
-    this.camera.position.y = 2.0 + (-Math.cos(this.clock.getElapsedTime() / 3) * 10.0)
-    this.camera.rotation.z = this.clock.getElapsedTime() * 15
+    this.camera.position.x = Math.sin(this.clock.getElapsedTime() / 2) * 5
+    this.camera.position.y = Math.cos(this.clock.getElapsedTime() / 3) * 7
+    this.camera.rotation.z =  this.clock.getElapsedTime() * (Math.tan(this.clock.getElapsedTime() / 1000) * 1000)
   }
 
   draw() {
@@ -105,25 +104,11 @@ class App {
   }
 
   mousedown() {
-    console.log('hier')
     this.renderer.autoClearColor = true
-    //this.camera.fov = 120
-    //this.camera.updateProjectionMatrix()
   }
 
   mouseup() {
-    console.log('daar')
     this.renderer.autoClearColor = false
-    //this.camera.fov = 70
-    //this.camera.updateProjectionMatrix()
-  }
-
-  mousemove(event) {
-    // let mouseX = (event.clientX / this.sceneWidth) * 2 - 1
-    // let mouseY = -(event.clientY / this.sceneHeight) * 2 + 1
-    // if(this.landscapeBottom) {
-    //   TweenMax.to(this.landscapeBottom.rotation, 0.1, {z:Math.PI * 4 * mouseX})
-    // }
   }
 }
 
