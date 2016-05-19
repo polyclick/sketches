@@ -7,22 +7,12 @@ import TweenMax from 'gsap'
 import THREE from 'three'
 window.THREE = THREE
 
-import ConvolutionShader from 'three/shaders/ConvolutionShader'
-import CopyShader from 'three/shaders/CopyShader'
-import EffectComposer from 'three/postprocessing/EffectComposer'
-import MaskPass from 'three/postprocessing/MaskPass'
-import RenderPass from 'three/postprocessing/RenderPass'
-import ShaderPass from 'three/postprocessing/ShaderPass'
-import BloomPass from 'three/postprocessing/BloomPass'
-
 class App {
   constructor() {
     this.canvas = null
     this.clock = null
     this.renderer = null
     this.camera = null
-    this.composer = null
-    this.renderPass = null
 
     this.scene = null
     this.meshes = null
@@ -55,34 +45,11 @@ class App {
     this.camera = new THREE.PerspectiveCamera(70, this.screenWidth / this.screenHeight, 1, 1000)
     this.camera.position.z = 500
 
-
-
     // scene
     this.scene = new THREE.Scene()
 
     // create world
     this.createWorld();
-
-
-
-    // composer
-    this.composer = new THREE.EffectComposer(this.renderer)
-
-    // render pass, will render the scene from the camera perspective to the framebuffer
-    let renderPass = new THREE.RenderPass(this.scene, this.camera)
-    this.composer.addPass(renderPass)
-
-    // adds a bloom to the previous pass
-    let bloomPass = new THREE.BloomPass(5, 50, 1.25, 512)
-    bloomPass.enabled = false;
-    this.composer.addPass(bloomPass)
-
-    // copies the previous pass and sets it as the end of the post processing filter chain
-    let effectCopy = new THREE.ShaderPass(THREE.CopyShader);
-    effectCopy.renderToScreen = true;
-    this.composer.addPass(effectCopy);
-
-
 
     // render & animation ticker
     TweenMax.ticker.fps(60)
@@ -91,8 +58,6 @@ class App {
     // resize handler, resize once
     this.resizeHandler()
     $(window).resize(() => { this.resizeHandler() })
-
-
 
     // sweep
     this.sweep()
@@ -173,9 +138,7 @@ class App {
   }
 
   render() {
-    //this.renderer.render(this.scene, this.camera)
-    let delta = this.clock.getDelta()
-    this.composer.render(delta)
+    this.renderer.render(this.scene, this.camera)
   }
 
   resizeHandler() {
