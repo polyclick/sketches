@@ -83,17 +83,17 @@ class App {
     $(document).click(() => { this.click() })
     $(document).mousedown(() => { this.mousedown() })
     $(document).mouseup(() => { this.mouseup() })
-    $(document).mousemove((event) => { this.mousemove(event) })
+    //$(document).mousemove((event) => { this.mousemove(event) })
   }
 
   createWorld() {
     this.landscapeBottom = new Landscape()
-    this.landscapeBottom.position.y = -200.0
+    this.landscapeBottom.position.y = -300.0
     this.scene.add(this.landscapeBottom)
 
     this.landscapeTop = new Landscape()
     this.landscapeTop.rotation.z = Math.PI
-    this.landscapeTop.position.y = 200.0
+    this.landscapeTop.position.y = 300.0
     this.scene.add(this.landscapeTop)
 
     this.trails = []

@@ -35,7 +35,7 @@ export class Trail extends THREE.Object3D {
     // tail mesh (add to parent so the tail doesn't move up and down in its enterity)
     let tailGeometry = new THREE.Geometry()
     for(let i = 0; i < this.MAX_HISTORY_POINTS; i++) tailGeometry.vertices.push(new THREE.Vector3(0, 0, 500))
-    let tailMaterial = new THREE.LineBasicMaterial({ color: '#ffffff', linewidth: 8, side:THREE.DoubleSide })
+    let tailMaterial = new THREE.LineBasicMaterial({ color: '#ffffff', linewidth: 4, side:THREE.DoubleSide })
     this.tail = new THREE.Line(tailGeometry, tailMaterial)
     this.parent.add(this.tail)
 

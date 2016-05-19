@@ -9,6 +9,8 @@ window.THREE = THREE
 
 import 'three/loaders/OBJLoader'
 
+import './util.js'
+
 import { Landscape } from './landscape.js'
 import { Trail } from './trail.js'
 
@@ -45,8 +47,9 @@ class App {
     this.renderer.setSize(this.sceneWidth, this.sceneHeight)
 
     // camera
-    this.camera = new THREE.PerspectiveCamera(70, this.sceneWidth / this.sceneHeight, 1, 1000)
-    this.camera.position.z = 250
+    this.camera = new THREE.PerspectiveCamera(50, this.sceneWidth / this.sceneHeight, 1, 1000)
+    this.camera.position.z = 0
+    this.camera.rotation.x = degToRad(-15)
 
     // scene & world
     this.scene = new THREE.Scene()
@@ -67,20 +70,20 @@ class App {
 
   createWorld() {
     this.landscapeBottom = new Landscape()
-    this.landscapeBottom.position.y = -200.0
+    this.landscapeBottom.position.y = -125.0
     this.scene.add(this.landscapeBottom)
 
-    this.landscapeTop = new Landscape()
-    this.landscapeTop.rotation.z = Math.PI
-    this.landscapeTop.position.y = 200.0
-    this.scene.add(this.landscapeTop)
+    // this.landscapeTop = new Landscape()
+    // this.landscapeTop.rotation.z = Math.PI
+    // this.landscapeTop.position.y = 200.0
+    // this.scene.add(this.landscapeTop)
 
     this.trails = []
     this.spawnTrail()
-    for(let i = 0; i < 8; i++) {
+    for(let i = 0; i < 10; i++) {
       setTimeout(() => {
         this.spawnTrail()
-      }, i * 1000)
+      }, i * 750)
     }
   }
 
@@ -97,7 +100,7 @@ class App {
 
   update() {
     if(this.landscapeBottom) this.landscapeBottom.update()
-    if(this.landscapeTop) this.landscapeTop.update()
+    // if(this.landscapeTop) this.landscapeTop.update()
     if(this.trails && this.trails.length) {
       _.each(this.trails, (trail) => {
         trail.update()

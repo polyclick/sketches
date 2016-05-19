@@ -36,17 +36,19 @@ export class Landscape extends THREE.Object3D {
     this.meshes = []
 
     // material
-    let material = new THREE.MeshBasicMaterial({ color: '#aaaaaa', wireframe: true })
+    let material = new THREE.MeshBasicMaterial({ color: '#666666', wireframe: true })
 
     // primary mesh
     let primary = new THREE.Mesh(blueprint.geometry, material)
     primary.position.z = -500
+    primary.scale.set(1, 1, 1.025)
     this.add(primary)
     this.meshes.push(primary)
 
     // secondary mesh
     let secondary = new THREE.Mesh(blueprint.geometry, material)
     secondary.position.z = -1500
+    secondary.scale.set(1, 1, 1.025)
     this.add(secondary)
     this.meshes.push(secondary)
   }
