@@ -19,7 +19,6 @@ import BloomPass from 'three/postprocessing/BloomPass'
 import './util.js'
 
 import { Landscape } from './landscape.js'
-import { Trail } from './trail.js'
 
 // application
 class App {
@@ -74,13 +73,13 @@ class App {
 
     // adds a bloom to the previous pass
     let bloomPass = new THREE.BloomPass(1, 25, 4.0, 1024)
-    bloomPass.enabled = true;
+    bloomPass.enabled = true
     this.composer.addPass(bloomPass)
 
     // copies the previous pass and sets it as the end of the post processing filter chain
-    let effectCopy = new THREE.ShaderPass(THREE.CopyShader);
-    effectCopy.renderToScreen = true;
-    this.composer.addPass(effectCopy);
+    let effectCopy = new THREE.ShaderPass(THREE.CopyShader)
+    effectCopy.renderToScreen = true
+    this.composer.addPass(effectCopy)
 
     // render & animation ticker
     TweenMax.ticker.fps(60)
@@ -88,39 +87,18 @@ class App {
 
     // resize handler, resize once
     $(window).resize(() => { this.resize() })
-
-    // mouse handlers
-    $(document).mousedown(() => { this.mousedown() })
-    $(document).mouseup(() => { this.mouseup() })
-    $(document).mousemove(() => { this.mousemove() })
   }
 
   createWorld() {
     this.landscapeBottom = new Landscape()
     this.landscapeBottom.position.x = -100.0
-    //this.landscapeBottom.position.y = -200.0
     this.landscapeBottom.rotation.z = degToRad(-90)
     this.scene.add(this.landscapeBottom)
 
     this.landscapeTop = new Landscape()
     this.landscapeTop.position.x = 100.0
-    //this.landscapeTop.position.y = 200.0
     this.landscapeTop.rotation.z = degToRad(90)
     this.scene.add(this.landscapeTop)
-
-    this.trails = []
-    this.spawnTrail()
-    for(let i = 0; i < 8; i++) {
-      setTimeout(() => {
-        this.spawnTrail()
-      }, i * 1000)
-    }
-  }
-
-  spawnTrail() {
-    let trail = new Trail(this.scene, this.clock, this.landscapeBottom)
-    //this.scene.add(trail)
-    this.trails.push(trail)
   }
 
   tick() {
@@ -131,18 +109,9 @@ class App {
   update() {
     if(this.landscapeBottom) this.landscapeBottom.update()
     if(this.landscapeTop) this.landscapeTop.update()
-    if(this.trails && this.trails.length) {
-      _.each(this.trails, (trail) => {
-        // trail.update()
-      })
-    }
-
-    //this.camera.position.y = 50.0 + (-Math.cos(this.clock.getElapsedTime() / 2) * 50.0)
   }
 
   draw() {
-    // this.renderer.render(this.scene, this.camera)
-
     let delta = this.clock.getDelta()
     this.composer.render(delta)
   }
@@ -159,18 +128,6 @@ class App {
 
     // update renderer
     this.renderer.setSize(this.sceneWidth, this.sceneHeight)
-  }
-
-  mousedown() {
-    this.renderer.autoClearColor = false
-  }
-
-  mouseup() {
-    this.renderer.autoClearColor = true
-  }
-
-  mousemove() {
-
   }
 }
 
