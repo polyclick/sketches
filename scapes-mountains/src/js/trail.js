@@ -62,7 +62,8 @@ export class Trail extends THREE.Object3D {
       tailGeometry.vertices[i].set(this.position.x, this.position.y, this.position.z)
 
     // random color
-    let colors = [0xB13254, 0xFF5449, 0xFF7349, 0xFF9249, 0xB94CFF, 0xFFE754]
+    //let colors = [0xB13254, 0xFF5449, 0xFF7349, 0xFF9249, 0xB94CFF, 0xFFE754]
+    let colors = [0x4DFFAE, 0xB94CFF]
     let color = colors[Math.round(Math.random() * (colors.length - 1))]
     this.tail.material.color.set(color)
   }

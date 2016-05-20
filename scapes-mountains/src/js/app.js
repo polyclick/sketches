@@ -47,9 +47,9 @@ class App {
     this.renderer.setSize(this.sceneWidth, this.sceneHeight)
 
     // camera
-    this.camera = new THREE.PerspectiveCamera(50, this.sceneWidth / this.sceneHeight, 1, 1000)
+    this.camera = new THREE.PerspectiveCamera(65, this.sceneWidth / this.sceneHeight, 1, 1000)
     this.camera.position.z = 0
-    this.camera.rotation.x = degToRad(-15)
+    //this.camera.rotation.x = degToRad(-15)
 
     // scene & world
     this.scene = new THREE.Scene()
@@ -69,14 +69,14 @@ class App {
   }
 
   createWorld() {
-    this.landscapeBottom = new Landscape()
-    this.landscapeBottom.position.y = -125.0
+    this.landscapeBottom = new Landscape('#999999')
+    this.landscapeBottom.position.y = -170.0
     this.scene.add(this.landscapeBottom)
 
-    // this.landscapeTop = new Landscape()
-    // this.landscapeTop.rotation.z = Math.PI
-    // this.landscapeTop.position.y = 200.0
-    // this.scene.add(this.landscapeTop)
+    this.landscapeTop = new Landscape('#222222')
+    this.landscapeTop.rotation.z = Math.PI
+    this.landscapeTop.position.y = 170.0
+    this.scene.add(this.landscapeTop)
 
     this.trails = []
     this.spawnTrail()
@@ -100,14 +100,12 @@ class App {
 
   update() {
     if(this.landscapeBottom) this.landscapeBottom.update()
-    // if(this.landscapeTop) this.landscapeTop.update()
+    if(this.landscapeTop) this.landscapeTop.update()
     if(this.trails && this.trails.length) {
       _.each(this.trails, (trail) => {
         trail.update()
       })
     }
-
-    //this.camera.position.y = 50.0 + (-Math.cos(this.clock.getElapsedTime() / 2) * 50.0)
   }
 
   draw() {
@@ -126,18 +124,6 @@ class App {
 
     // update renderer
     this.renderer.setSize(this.sceneWidth, this.sceneHeight)
-  }
-
-  mousedown() {
-    this.renderer.autoClearColor = false
-  }
-
-  mouseup() {
-    this.renderer.autoClearColor = true
-  }
-
-  mousemove() {
-
   }
 }
 
