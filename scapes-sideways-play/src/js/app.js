@@ -71,6 +71,7 @@ class App {
     }
 
     this.gui = new dat.GUI()
+    dat.GUI.toggleHide()
     this.gui.add(guiElements, 'start')
     this.gui.add(guiElements, 'stop')
     this.gui.add(guiElements, 'save')

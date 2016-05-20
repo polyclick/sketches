@@ -9,7 +9,7 @@ export class Element extends THREE.Object3D {
 
   init() {
     let geometry = this.createRandomGeometry()
-    let material = new THREE.MeshNormalMaterial()
+    let material = new THREE.MeshNormalMaterial({})
 
     let mesh = new THREE.Mesh(geometry, material)
     let scale = 0.10 + (Math.random() * 0.15)

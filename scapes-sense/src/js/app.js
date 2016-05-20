@@ -10,8 +10,9 @@ window.THREE = THREE
 
 import 'three/loaders/OBJLoader'
 
+import './util.js'
+
 import { Landscape } from './landscape.js'
-import { Trail } from './trail.js'
 
 // application
 class App {
@@ -30,14 +31,7 @@ class App {
     this.sceneWidth = window.innerWidth
     this.sceneHeight = window.innerHeight
 
-    // parameters
-    this.parameters = {
-      bgcolor: 0x130C19,
-      fogcolor: 0x130C19,
-      color1: 0x2A2763,
-      color2: 0xFF5449,
-      color3: 0xFF8748
-    }
+    this.parameters = {}
 
     $(document).ready(() => {
       this.init()
@@ -47,8 +41,29 @@ class App {
 
   init() {
 
-    // canvas
+    // elements
+    this.$overlay = $('.overlay')
+    this.$heroTitle = $('.herotitle')
     this.$canvas = $('#canvas')
+
+    // random palette
+    let colorPalette = randomFromArray([
+      [0x130C19, 0x2A2763, 0xFF5449, 0xFF8748],
+      [0x130C19, 0x2a2763, 0x49ffde, 0xff4848],
+      [0x130C19, 0x2a2663, 0x49ff9e, 0xff48a8]
+    ])
+
+    // parameters
+    this.parameters = {
+      bgcolor: colorPalette[0],
+      fogcolor: colorPalette[0],
+      color1: colorPalette[1],
+      color2: colorPalette[2],
+      color3: colorPalette[3]
+    }
+
+    // overlay
+    TweenMax.to(this.$overlay, 5.0, {opacity: 0})
 
     // clock
     this.clock = new THREE.Clock()
@@ -69,6 +84,9 @@ class App {
     this.scene.fog = this.fog
     this.createWorld()
 
+    // title
+    this.$heroTitle.css('color', '#' + colorPalette[2].toString(16))
+
     // setup gui
     this.setupGui()
 
@@ -78,11 +96,6 @@ class App {
 
     // resize handler, resize once
     $(window).resize(() => { this.resize() })
-
-    // mouse handlers
-    $(document).mousedown(() => { this.mousedown() })
-    $(document).mouseup(() => { this.mouseup() })
-    $(document).mousemove(() => { this.mousemove() })
   }
 
   createWorld() {
@@ -94,14 +107,6 @@ class App {
     this.landscapeTop.rotation.z = Math.PI
     this.landscapeTop.position.y = 200.0
     this.scene.add(this.landscapeTop)
-
-    this.trails = []
-    // this.spawnTrail()
-    // for(let i = 0; i < 8; i++) {
-    //   setTimeout(() => {
-    //     this.spawnTrail()
-    //   }, i * 1000)
-    // }
 
     this.light1 = new THREE.PointLight(this.parameters.color1, 30, 500)
     this.light1.position.set(0, 0, -500)
@@ -116,12 +121,6 @@ class App {
     this.scene.add(this.light3)
   }
 
-  spawnTrail() {
-    let trail = new Trail(this.scene, this.clock, this.landscapeBottom)
-    this.scene.add(trail)
-    this.trails.push(trail)
-  }
-
   tick() {
     this.update()
     this.draw()
@@ -130,13 +129,6 @@ class App {
   update() {
     if(this.landscapeBottom) this.landscapeBottom.update()
     if(this.landscapeTop) this.landscapeTop.update()
-    if(this.trails && this.trails.length) {
-      _.each(this.trails, (trail) => {
-        trail.update()
-      })
-    }
-
-    //this.camera.position.y = 50.0 + (-Math.cos(this.clock.getElapsedTime() / 2) * 50.0)
   }
 
   draw() {
@@ -157,21 +149,15 @@ class App {
     this.renderer.setSize(this.sceneWidth, this.sceneHeight)
   }
 
-  mousedown() {
-    this.renderer.autoClearColor = false
-  }
-
-  mouseup() {
-    this.renderer.autoClearColor = true
-  }
-
-  mousemove() {
-
-  }
-
   setupGui() {
     this.gui = new dat.GUI()
-    //dat.gui.GUI.toggleHide()
+
+    // enable gui, but hide it first
+    // user can call it by pressing 'h'
+    dat.gui.GUI.toggleHide()
+    setTimeout(() => {
+      $('.dg.ac').css('opacity', 1)
+    }, 250)
 
     // Colors
     let colorFolder = this.gui.addFolder('Colors')
@@ -180,7 +166,10 @@ class App {
     colorFolder.addColor(this.parameters, 'fogcolor').onChange((value) => { this.fog.color.set(value) })
     colorFolder.addColor(this.parameters, 'color1').onChange((value) => { this.light1.color.set(value) })
     colorFolder.addColor(this.parameters, 'color2').onChange((value) => { this.light2.color.set(value) })
-    colorFolder.addColor(this.parameters, 'color3').onChange((value) => { this.light3.color.set(value) })
+    colorFolder.addColor(this.parameters, 'color3').onChange((value) => {
+      this.light3.color.set(value)
+      this.$heroTitle.css('color', '#' + value.toString(16))
+    })
   }
 }
 

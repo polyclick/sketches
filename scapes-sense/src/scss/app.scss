@@ -25,11 +25,24 @@ body {
   text-align: center;
   top: 50%;
   transform: translate(-50%, -60%);
-  font-size: 20vh;
+  font-size: 8vh;
   line-height: 1.0;
   user-select: none;
 }
 
-.subtext {
-  font-size: 4.8vh;
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  opacity: 1;
+  background-color: black;
+  transform: translateZ(0);
+}
+
+.dg.ac {
+  z-index: 1000 !important;
+  opacity: 0;
 }
