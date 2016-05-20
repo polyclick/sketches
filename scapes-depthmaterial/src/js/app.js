@@ -11,7 +11,6 @@ window.THREE = THREE
 import 'three/loaders/OBJLoader'
 
 import { Landscape } from './landscape.js'
-import { Trail } from './trail.js'
 
 // application
 class App {
@@ -23,9 +22,6 @@ class App {
     this.camera = null
     this.fog = null
     this.scene = null
-    this.light1 = null
-    this.light2 = null
-    this.light3 = null
 
     this.sceneWidth = window.innerWidth
     this.sceneHeight = window.innerHeight
@@ -78,12 +74,6 @@ class App {
 
     // resize handler, resize once
     $(window).resize(() => { this.resize() })
-
-    // mouse handlers
-    $(document).click(() => { this.click() })
-    $(document).mousedown(() => { this.mousedown() })
-    $(document).mouseup(() => { this.mouseup() })
-    //$(document).mousemove((event) => { this.mousemove(event) })
   }
 
   createWorld() {
@@ -95,26 +85,6 @@ class App {
     this.landscapeTop.rotation.z = Math.PI
     this.landscapeTop.position.y = 300.0
     this.scene.add(this.landscapeTop)
-
-    this.trails = []
-    // this.spawnTrail()
-    // for(let i = 0; i < 8; i++) {
-    //   setTimeout(() => {
-    //     this.spawnTrail()
-    //   }, i * 1000)
-    // }
-
-    // this.light1 = new THREE.PointLight(this.parameters.color1, 30, 500)
-    // this.light1.position.set(0, 0, -500)
-    // this.scene.add(this.light1)
-
-    // this.light2 = new THREE.PointLight(this.parameters.color2, 30, 250)
-    // this.light2.position.set(150, -50, -250)
-    // this.scene.add(this.light2)
-
-    // this.light3 = new THREE.PointLight(this.parameters.color3, 25, 350)
-    // this.light3.position.set(-150, 50, -150)
-    // this.scene.add(this.light3)
   }
 
   spawnTrail() {
@@ -131,13 +101,6 @@ class App {
   update() {
     if(this.landscapeBottom) this.landscapeBottom.update()
     if(this.landscapeTop) this.landscapeTop.update()
-    if(this.trails && this.trails.length) {
-      _.each(this.trails, (trail) => {
-        trail.update()
-      })
-    }
-
-    //this.camera.position.y = 50.0 + (-Math.cos(this.clock.getElapsedTime() / 2) * 50.0)
   }
 
   draw() {
@@ -158,36 +121,6 @@ class App {
     this.renderer.setSize(this.sceneWidth, this.sceneHeight)
   }
 
-  click() {
-    // this.landscapeTop.animateToNextColor()
-    // this.landscapeBottom.animateToNextColor()
-  }
-
-  mousedown() {
-    // this.renderer.autoClearColor = false
-  }
-
-  mouseup() {
-    // this.renderer.autoClearColor = true
-  }
-
-  mousemove(event) {
-    let x = (event.clientX / window.innerWidth) * 2 - 1
-    let y = -(event.clientY / window.innerHeight) * 2 + 1
-
-    if(this.landscapeTop.meshes && this.landscapeTop.meshes.length) {
-      _.each(this.landscapeTop.meshes, (mesh) => {
-        mesh.rotation.y = Math.PI / 2 * x
-      })
-    }
-
-    if(this.landscapeBottom.meshes && this.landscapeBottom.meshes.length) {
-      _.each(this.landscapeBottom.meshes, (mesh) => {
-        mesh.rotation.y = Math.PI / 2 * x
-      })
-    }
-  }
-
   setupGui() {
     this.gui = new dat.GUI()
     dat.gui.GUI.toggleHide()
@@ -197,9 +130,6 @@ class App {
     colorFolder.open()
     colorFolder.addColor(this.parameters, 'bgcolor').onChange((value) => { this.renderer.setClearColor(value) })
     colorFolder.addColor(this.parameters, 'fogcolor').onChange((value) => { this.fog.color.set(value) })
-    colorFolder.addColor(this.parameters, 'color1').onChange((value) => { this.light1.color.set(value) })
-    colorFolder.addColor(this.parameters, 'color2').onChange((value) => { this.light2.color.set(value) })
-    colorFolder.addColor(this.parameters, 'color3').onChange((value) => { this.light3.color.set(value) })
   }
 }
 
