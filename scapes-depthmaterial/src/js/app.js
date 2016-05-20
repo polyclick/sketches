@@ -17,7 +17,6 @@ class App {
   constructor() {
     this.$canvas = null
 
-    this.clock = null
     this.renderer = null
     this.camera = null
     this.fog = null
@@ -29,10 +28,7 @@ class App {
     // parameters
     this.parameters = {
       bgcolor: 0x130C19,
-      fogcolor: 0x130C19,
-      color1: 0x2A2763,
-      color2: 0xFF5449,
-      color3: 0xFF8748
+      fogcolor: 0x130C19
     }
 
     $(document).ready(() => {
@@ -45,9 +41,6 @@ class App {
 
     // canvas
     this.$canvas = $('#canvas')
-
-    // clock
-    this.clock = new THREE.Clock()
 
     // renderer
     this.renderer = new THREE.WebGLRenderer({ canvas: this.$canvas[0], antialias: true, preserveDrawingBuffer: true })
@@ -85,12 +78,6 @@ class App {
     this.landscapeTop.rotation.z = Math.PI
     this.landscapeTop.position.y = 300.0
     this.scene.add(this.landscapeTop)
-  }
-
-  spawnTrail() {
-    let trail = new Trail(this.scene, this.clock, this.landscapeBottom)
-    this.scene.add(trail)
-    this.trails.push(trail)
   }
 
   tick() {

@@ -16,7 +16,6 @@ class App {
   constructor() {
     this.$canvas = null
 
-    this.clock = null
     this.renderer = null
     this.camera = null
     this.scene = null
@@ -34,9 +33,6 @@ class App {
 
     // canvas
     this.$canvas = $('#canvas')
-
-    // clock
-    this.clock = new THREE.Clock()
 
     // renderer
     this.renderer = new THREE.WebGLRenderer({ canvas: this.$canvas[0], antialias: true, preserveDrawingBuffer: true })
@@ -57,11 +53,6 @@ class App {
 
     // resize handler, resize once
     $(window).resize(() => { this.resize() })
-
-    // mouse handlers
-    $(document).mousedown(() => { this.mousedown() })
-    $(document).mouseup(() => { this.mouseup() })
-    $(document).mousemove(() => { this.mousemove() })
   }
 
   createWorld() {
@@ -84,8 +75,6 @@ class App {
   update() {
     if(this.landscapeLeft) this.landscapeLeft.update()
     if(this.landscapeRight) this.landscapeRight.update()
-
-    //this.camera.position.y = 50.0 + (-Math.cos(this.clock.getElapsedTime() / 2) * 50.0)
   }
 
   draw() {
@@ -104,18 +93,6 @@ class App {
 
     // update renderer
     this.renderer.setSize(this.sceneWidth, this.sceneHeight)
-  }
-
-  mousedown() {
-    this.renderer.autoClearColor = false
-  }
-
-  mouseup() {
-    this.renderer.autoClearColor = true
-  }
-
-  mousemove() {
-
   }
 }
 

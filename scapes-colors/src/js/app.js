@@ -57,11 +57,6 @@ class App {
 
     // resize handler, resize once
     $(window).resize(() => { this.resize() })
-
-    // mouse handlers
-    $(document).mousedown(() => { this.mousedown() })
-    $(document).mouseup(() => { this.mouseup() })
-    $(document).mousemove(() => { this.mousemove() })
   }
 
   createWorld() {
@@ -75,8 +70,6 @@ class App {
 
   update() {
     if(this.landscape) this.landscape.update()
-
-    //this.camera.position.y = 50.0 + (-Math.cos(this.clock.getElapsedTime() / 2) * 50.0)
   }
 
   draw() {
@@ -95,18 +88,6 @@ class App {
 
     // update renderer
     this.renderer.setSize(this.sceneWidth, this.sceneHeight)
-  }
-
-  mousedown() {
-    this.renderer.autoClearColor = false
-  }
-
-  mouseup() {
-    this.renderer.autoClearColor = true
-  }
-
-  mousemove() {
-
   }
 }
 

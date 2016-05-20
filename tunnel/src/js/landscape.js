@@ -5,14 +5,6 @@ export class Landscape extends THREE.Object3D {
     super()
 
     this.objects = null
-
-    this.color = { h:0, s:0, l:100 }  // #ffffff
-    this.colors = [
-      { h:4, s:100, l:64 },   // #FF5449
-      { h:14, s:100, l:64 },  // #FF7349
-      { h:24, s:100, l:64 }   // #FF9249
-    ]
-
     this.size = 400
 
     this.init()
@@ -86,7 +78,6 @@ export class Landscape extends THREE.Object3D {
     if(this.objects && this.objects.length) {
       _.each(this.objects, (object) => {
         object.position.z += 2
-
         if(object.position.z > this.size / 2) {
           object.position.z = -((this.size * 3) + (this.size / 2))
         }

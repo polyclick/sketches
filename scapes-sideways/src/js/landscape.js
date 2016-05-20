@@ -65,7 +65,6 @@ export class Landscape extends THREE.Object3D {
   }
 
   update() {
-    let colors = [0xB13254, 0xFF5449, 0xFF7349, 0xFF9249]
     if(this.meshes && this.meshes.length) {
       _.each(this.meshes, (mesh) => {
         mesh.position.z += 2
