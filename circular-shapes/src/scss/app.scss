@@ -1,0 +1,46 @@
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  // scss-lint:disable ImportantRule
+  background-color: #fff;
+  -webkit-font-smoothing: antialiased !important;
+  font-smoothing: subpixel-antialiased;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  text-rendering: optimizeLegibility !important;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, .004);
+
+  background-color: #eee;
+  font-size: 0;
+  line-height: 0;
+}
+
+body.ina {
+  .backdrop {
+    background-image: url('../images/ina.jpg');
+    background-size: cover;
+    width: 100%;
+    height: 100%;
+  }
+
+  .shapeshift {
+    position: absolute;
+    top: 10%;
+    left: 25%;
+    width: 45vw;
+    height: 45vw;
+    opacity: 1;
+    mix-blend-mode: overlay;
+  }
+}
+
+.shapeshift {
+  display: inline-block;
+  width: 25vw;
+  height: 25vw;
+}
