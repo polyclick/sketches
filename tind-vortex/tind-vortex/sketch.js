@@ -1,55 +1,65 @@
 
-let tickness = minTickness
 let numRings = 21
 let minInnerRadius = 55
 let offsetRadius = 3
 let layers = []
-let blendSelect
-let colorSelect
 
-let blendModes = []
 let colorOrders = []
-
-let color1 = `#4F157B` //`#1A9FF9` //`#8b28b4`
-let color2 = `#486BFF` //`#258056` //`#ffd907`
-let color3 = `#63FF9F` //`#0C3351` //`#ff079f`
+let config = {
+  bottom: `#4F157B`,  //`#1A9FF9` //`#8b28b4`
+  mid: `#486BFF`,     //`#258056` //`#ffd907`
+  top: `#63FF9F`,      //`#0C3351` //`#ff079f`
+  blendMode: null,
+  colorOrder: `bottom - mid - top`
+}
 
 function setup() {
-  createCanvas(1000, 1000)
+  createCanvas(window.innerWidth * 0.75, window.innerWidth * 0.75)
 
-  layers = [color1, color2, color3]
+  layers = [config.bottom, config.mid, config.top]
+  config.blendMode = DARKEST
 
-  blendModes = [
-    [`DARKEST`, DARKEST],
-    [`MULTIPLY`, MULTIPLY],
-    [`OVERLAY`, OVERLAY],
-    [`HARD_LIGHT`, HARD_LIGHT],
-    [`DIFFERENCE`, DIFFERENCE],
-    [`EXCLUSION`, EXCLUSION],
-    [`NORMAL`, BLEND]
+  const blendModes = {
+    'Darkest': DARKEST,
+    'Multiply': MULTIPLY,
+    'Overlay': OVERLAY,
+    'Hard light': HARD_LIGHT,
+    'Difference': DIFFERENCE,
+    'Exclusion': EXCLUSION,
+    'Normal': BLEND
+  }
+
+  const colorOrders = [
+    `bottom - mid - top`,
+    `bottom - top - mid`,
+    `mid - bottom - top`,
+    `mid - top - bottom`,
+    `top - bottom - mid`,
+    `top - mid - bottom`
   ]
 
-  colorOrders = [
-    `A - B - C`,
-    `A - C - B`,
-    `B - A - C`,
-    `B - C - A`,
-    `C - A - B`,
-    `C - B - A`
-  ]
+  const gui = new dat.GUI()
+  gui.__proto__.constructor.toggleHide()
+  gui.addColor(config, `bottom`).onFinishChange((value) => { configureAndDraw() })
+  gui.addColor(config, `mid`).onFinishChange((value) => { configureAndDraw() })
+  gui.addColor(config, `top`).onFinishChange((value) => { configureAndDraw() })
+  gui.add(config, `blendMode`, blendModes).onFinishChange((value) => { configureAndDraw() })
+  gui.add(config, `colorOrder`, colorOrders).onFinishChange((value) => { configureAndDraw() })
+  gui.add({save: () => saveCanvas()}, `save`)
+}
 
-  blendSelect = createSelect()
-  blendSelect.position(10, 10)
-  blendModes.forEach(mode => blendSelect.option(mode[0]))
-  blendSelect.changed(blendModeSelected)
+function configureAndDraw() {
+  layers = config.colorOrder.split(` - `).map((color) => {
+    if(color === `bottom`) return config.bottom
+    if(color === `mid`) return config.mid
+    if(color === `top`) return config.top
+  })
 
-  colorSelect = createSelect()
-  colorSelect.position(10, 50)
-  colorOrders.forEach(colorOrder => colorSelect.option(colorOrder))
-  colorSelect.changed(colorOrderSelected)
+  draw()
 }
 
 function draw() {
+  blendMode(BLEND)
   background(255)
 
   let offsetAngle = 0
@@ -62,7 +72,7 @@ function draw() {
     let rotation = -Math.PI / 5 + (i * Math.PI / 2)
     let radius = minInnerRadius
 
-
+    // draw the rings for this layer
     for(let j = 0; j < numRings; j++) {
       const ring = new Ring(x, y, -rotation, radius, layers[i])
       ring.draw(g)
@@ -71,35 +81,15 @@ function draw() {
       radius += ((height / 2) - minInnerRadius) / numRings
     }
 
-    if(i > 0) {
-      const selected = blendModes.find(blendMode => blendSelect.value() === blendMode[0])
-      blendMode(selected[1])
-    }
+    // blend layers AFTER first one
+    if(i > 0) blendMode(config.blendMode)
 
-    offsetAngle += (2 * Math.PI) / layers.length
+    // draw layer
     image(g, 0, 0)
 
+    // set offset angle for next layer
+    offsetAngle += (2 * Math.PI) / layers.length
   }
+
   noLoop()
-}
-
-function blendModeSelected() {
-  var item = blendSelect.value()
-  blendMode(BLEND)
-  background(255)
-  draw()
-}
-
-function colorOrderSelected() {
-  var item = colorSelect.value()
-
-  layers = item.split(` - `).map((color) => {
-    if(color === `A`) return color1
-    if(color === `B`) return color2
-    if(color === `C`) return color3
-  })
-
-  blendMode(BLEND)
-  background(255)
-  draw()
 }
