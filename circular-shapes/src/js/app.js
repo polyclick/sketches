@@ -2,8 +2,8 @@
 import TweenMax from 'gsap'
 
 // includes
-import Shapeshift from './shapeshift'
-import { hasClass } from './utils'
+import Shapeshift from './shapeshift.js'
+import { hasClass } from './utils.js'
 
 
 // application

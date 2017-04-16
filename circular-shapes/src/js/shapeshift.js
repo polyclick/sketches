@@ -2,7 +2,7 @@
 import paper from 'paper'
 
 // includes
-import { mergeDeep } from './utils'
+import { mergeDeep } from './utils.js'
 
 
 
