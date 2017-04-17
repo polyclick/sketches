@@ -6,22 +6,23 @@ let layers = []
 
 let colorOrders = []
 let config = {
-  bottom: `#4F157B`,  //`#1A9FF9` //`#8b28b4`
-  mid: `#486BFF`,     //`#258056` //`#ffd907`
-  top: `#63FF9F`,      //`#0C3351` //`#ff079f`
+  bottom: `#4F157B`,  //`#503C53`,  //`#4F157B`, //`#1A9FF9` //`#8b28b4`
+  mid: `#486BFF`,     //`#D4896A`,  //`#486BFF`, //`#258056` //`#ffd907`
+  top: `#63FF9F`,     //`#FFBB6C`,  //`#63FF9F`, //`#0C3351` //`#ff079f`
   blendMode: null,
   colorOrder: `bottom - mid - top`
 }
 
+
 function setup() {
-  createCanvas(window.innerWidth * 0.75, window.innerWidth * 0.75)
+  createCanvas(1000, 1000)
 
   layers = [config.bottom, config.mid, config.top]
-  config.blendMode = DARKEST
+  config.blendMode = MULTIPLY
 
   const blendModes = {
-    'Darkest': DARKEST,
     'Multiply': MULTIPLY,
+    'Darkest': DARKEST,
     'Overlay': OVERLAY,
     'Hard light': HARD_LIGHT,
     'Difference': DIFFERENCE,
