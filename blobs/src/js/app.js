@@ -26,17 +26,22 @@ class App {
     this.noiseCanvas = null
 
     this.config = {
-      debug: false,
-      blob: {
-        detail: 4,
-
-        minRadius: 100,
-        maxRadius: 200,
-
+      debug: true,
+      detail: 4,
+      animate: true,
+      noise: {
+        active: true,
         amplitude: 1.0,
         frequency: 0.4,
         octaves: 1,
         persistence: 0.5
+      },
+      morph: {
+        active: true,
+        time: 15.0,
+        speed: 0.1,
+        amplitude: 1.4,
+        frequency: 0.9
       }
     }
 
@@ -70,9 +75,9 @@ class App {
 
     // scene & world
     this.scene = new THREE.Scene()
+    this.createGui()
     this.createWorld()
     this.addLigths()
-    this.createGui()
 
     // render & animation ticker
     TweenMax.ticker.fps(60)
@@ -81,10 +86,12 @@ class App {
     // resize
     window.addEventListener(`resize`, () => { this.resize() }, false)
     window.addEventListener(`keyup`, (event) => { this.handleKeyUp(event) }, false)
+
+
   }
 
   createWorld() {
-    // todo
+    this.spawn()
   }
 
   addLigths() {
@@ -117,11 +124,20 @@ class App {
 
     // gui controls
     this.gui = new dat.GUI()
-    this.gui.add(this.config.blob, `detail`, {lowest: 1, low: 2, medium: 3, high: 4, highest: 5}).onChange(() => this.createWorld())
-    this.gui.add(this.config.blob, `amplitude`, 0.1, 1.0).onChange(() => this.createWorld())
-    this.gui.add(this.config.blob, `frequency`, 0.1, 1.0).onChange(() => this.createWorld())
-    this.gui.add(this.config.blob, `octaves`, 1, 10).onChange(() => this.createWorld())
-    this.gui.__proto__.constructor.toggleHide()
+    this.gui.add(this.config, `detail`, {lowest: 1, low: 2, medium: 3, high: 4, highest: 5}).onChange(() => this.createWorld())
+
+    this.gui.add(this.config.noise, `active`).onChange(() => this.createWorld())
+    this.gui.add(this.config.noise, `amplitude`, 0.1, 1.0).onChange(() => this.createWorld())
+    this.gui.add(this.config.noise, `frequency`, 0.1, 1.0).onChange(() => this.createWorld())
+    this.gui.add(this.config.noise, `octaves`, 1, 10).onChange(() => this.createWorld())
+
+    this.gui.add(this.config.morph, `active`).onChange(() => this.createWorld())
+    this.gui.add(this.config.morph, `time`, 1.0, 250.0).onChange(() => this.createWorld())
+    this.gui.add(this.config.morph, `speed`, 0.1, 5.0).onChange(() => this.createWorld())
+    this.gui.add(this.config.morph, `amplitude`, 0.1, 25.0).onChange(() => this.createWorld())
+    this.gui.add(this.config.morph, `frequency`, 0.1, 25.0).onChange(() => this.createWorld())
+
+    this.gui.add(this.config, `animate`).onChange(() => this.createWorld())
 
     // canvas element for noise debug
     this.noiseCanvas = document.createElement(`canvas`)
@@ -134,23 +150,61 @@ class App {
     document.body.appendChild(this.noiseCanvas)
   }
 
-  displace(baseGeometry, noise) {
+  noiseDisplace(geometry, noise) {
     let radius, vertex, displace
 
     // compute bounding sphere, get radius
-    baseGeometry.computeBoundingSphere()
-    radius = baseGeometry.boundingSphere.radius || 1
+    geometry.computeBoundingSphere()
+    radius = geometry.boundingSphere.radius || 1
 
     // apply noise by multiplying each vertex vector with the looked up noise value
-    for(let i = 0; i < baseGeometry.vertices.length; i++) {
-      vertex = baseGeometry.vertices[i]
+    for(let i = 0; i < geometry.vertices.length; i++) {
+      vertex = geometry.vertices[i]
       displace = noise.get3DNoise(vertex.x / radius, vertex.y / radius, vertex.z / radius)
       vertex.multiplyScalar(1 + displace)
     }
 
-    return baseGeometry
+    return geometry
   }
 
+
+  morphDisplace(geometry, time, speed, frequency, amplitude) {
+    let vertex, displace
+
+    // const frequency = Math.random(0.5, 2.0)
+    // const amplitude = Math.random(0.3, 1.0)
+    // console.log(frequency, amplitude)
+
+    for(let i = 0; i < geometry.vertices.length; i++) {
+      vertex = geometry.vertices[i]
+      geometry.vertices[i].y += Math.cos(time * speed + vertex.x * frequency) * amplitude;
+    }
+
+    return geometry
+  }
+
+  centerGeometry(geometry) {
+
+    // compute bounding box
+    geometry.computeBoundingBox()
+
+    // get calculated center
+    var center	= new THREE.Vector3()
+    center.x	= (geometry.boundingBox.min.x + geometry.boundingBox.max.x) / 2
+    center.y	= (geometry.boundingBox.min.y + geometry.boundingBox.max.y) / 2
+    center.z	= (geometry.boundingBox.min.z + geometry.boundingBox.max.z) / 2
+
+    // negate for counter translation
+    var delta = center.negate()
+
+    // translate vertices so that calculated center become 0, 0, 0
+    for(var i = 0; i < geometry.vertices.length; i++) {
+      var vertex = geometry.vertices[i]
+      vertex.add(delta)
+    }
+
+    return geometry
+  }
 
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -164,17 +218,14 @@ class App {
 
 
   update() {
+    if(!this.config.animate) return
+
     const meshes = this.scene.children.filter(child => child instanceof THREE.Mesh)
     meshes.forEach(mesh => {
-      // mesh.scale.x += 0.01
-      // mesh.scale.y += 0.01
-      //mesh.position.x += 0.5
       mesh.rotation.z += 0.01
-      mesh.rotation.x += 0.01
-      //mesh.scale.z += 0.01
-      //mesh.scale.set(mesh.scale.x + 0.1, mesh.scale.y + 0.1)
+      mesh.rotation.x += 0.005
       mesh.position.z -= 0.1
-      if(mesh.position.z < -250)
+      if(mesh.position.z < -50)
         this.scene.remove(mesh)
     })
   }
@@ -212,15 +263,47 @@ class App {
 
 
   spawn() {
-
-    // create noise
-    const noise = new FastSimplexNoise(this.config.blob)
+    while(this.scene.children.length)
+      this.scene.remove(this.scene.children[0])
 
     // create displaced geometry
     const radius = 1
-    const geometry = this.displace(new THREE.IcosahedronGeometry(radius, this.config.blob.detail), noise)
+    let geometry = new THREE.IcosahedronGeometry(radius, this.config.detail)
 
+    // apply noise deformer
+    if(this.config.noise.active) {
+      var noise = new FastSimplexNoise(this.config.noise)
+      geometry = this.noiseDisplace(
+        geometry,
+        noise)
+    }
 
+    // apply morph deformer
+    if(this.config.morph.active) {
+      geometry = this.morphDisplace(
+        geometry,
+        30 + (Math.random() * (35 - 30)),
+        0.1,
+        this.config.morph.frequency,
+        this.config.morph.amplitude)
+    }
+
+    // recalc geom general stuff when one or more deformers are active
+    if(this.config.noise.active || this.config.morph.active) {
+
+      // center geom
+      geometry = this.centerGeometry(geometry)
+
+      // update stuff
+      geometry.verticesNeedUpdate = true
+      geometry.normalsNeedUpdate = true
+      geometry.uvsNeedUpdate = true
+      geometry.computeBoundingBox()
+      geometry.computeBoundingSphere()
+      geometry.computeFaceNormals()
+      geometry.computeVertexNormals()
+      geometry.computeMorphNormals()
+    }
 
     // material with vertex colors
     //
@@ -254,11 +337,11 @@ class App {
 
 
     // shader material with spherical enviroment mapping
-    const num = parseInt(Math.round(Math.random() * 48))
-    const file = `images/matcap/matcap-${num}.jpg`
+    const num = parseInt(Math.round(Math.random() * 29))
+    const file = `images/matcap-filtered/matcap-${num}.jpg` //`images/matcap/matcap-41.jpg`
     const texture = new THREE.TextureLoader().load(file)
-    texture.wrapS = THREE.RepeatWrapping
-    texture.wrapT = THREE.RepeatWrapping
+    texture.wrapS = THREE.ClampToEdgeWrapping
+    texture.wrapT = THREE.ClampToEdgeWrapping
     console.log(`Using: ${file}`)
     const material = new THREE.ShaderMaterial({
       uniforms: {
@@ -274,12 +357,13 @@ class App {
 
 
     this.mesh = new THREE.Mesh(geometry, material)
-    this.mesh.position.set(0, 0, 0)
+    this.mesh.position.set(0, 0, -5)
+    //this.mesh.rotation.y = Math.PI / 2
     this.scene.add(this.mesh)
 
 
     // Draw 2d noise debug
-    if(this.config.debug) {
+    if(this.config.debug && noise) {
       let x, y, val
       const context = this.noiseCanvas.getContext(`2d`)
       context.fillRect(0, 0, this.noiseCanvas.width, this.noiseCanvas.height)
