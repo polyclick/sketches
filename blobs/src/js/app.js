@@ -5,6 +5,7 @@ import dat from 'dat.gui/build/dat.gui.min.js'
 
 // includes
 import FastSimplexNoise from './fast-simplex-noise.js'
+import { VERTEX_SHADER, FRAGMENT_SHADER } from './sem-shader2.js'
 
 
 
@@ -67,10 +68,10 @@ class App {
     this.camera.position.z = 5
     //this.camera = new THREE.OrthographicCamera( this.sceneWidth / - 2, this.sceneWidth / 2, this.sceneHeight / 2, this.sceneHeight / - 2, 1, 1000)
 
-
     // scene & world
     this.scene = new THREE.Scene()
     this.createWorld()
+    this.addLigths()
     this.createGui()
 
     // render & animation ticker
@@ -83,7 +84,10 @@ class App {
   }
 
   createWorld() {
+    // todo
+  }
 
+  addLigths() {
     // add lights
     // ambient light
     let light = new THREE.AmbientLight(0xffffff, 0.1)
@@ -166,11 +170,12 @@ class App {
       // mesh.scale.y += 0.01
       //mesh.position.x += 0.5
       mesh.rotation.z += 0.01
+      mesh.rotation.x += 0.01
       //mesh.scale.z += 0.01
       //mesh.scale.set(mesh.scale.x + 0.1, mesh.scale.y + 0.1)
-      mesh.position.z -= 0.01
-      // if(mesh.position.z < -250)
-      //   this.scene.remove(mesh)
+      mesh.position.z -= 0.1
+      if(mesh.position.z < -250)
+        this.scene.remove(mesh)
     })
   }
 
@@ -241,11 +246,32 @@ class App {
     // material with gradient texture map
     //
     //
-    var texture = new THREE.TextureLoader().load(`images/gradient0${parseInt(Math.round(Math.random() * 6))}.jpg`)
+    // var texture = new THREE.TextureLoader().load(`images/gradient0${parseInt(Math.round(Math.random() * 6))}.jpg`)
+    // texture.wrapS = THREE.RepeatWrapping
+    // texture.wrapT = THREE.RepeatWrapping
+    // const material = new THREE.MeshPhongMaterial({color: 0xffffff, map: texture, lightMap:texture, specular:0x222222, shininess: 50})
+
+
+
+    // shader material with spherical enviroment mapping
+    const num = parseInt(Math.round(Math.random() * 48))
+    const file = `images/matcap/matcap-${num}.jpg`
+    const texture = new THREE.TextureLoader().load(file)
     texture.wrapS = THREE.RepeatWrapping
     texture.wrapT = THREE.RepeatWrapping
-    //texture.repeat.set(5, 1)
-    const material = new THREE.MeshPhongMaterial({ color: 0xffffff, map: texture, lightMap:texture, specular:0x222222, shininess: 50})
+    console.log(`Using: ${file}`)
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        tMatCap: {
+          type: `t`,
+          value: texture
+        },
+      },
+      vertexShader: VERTEX_SHADER,
+      fragmentShader: FRAGMENT_SHADER,
+      shading: THREE.SmoothShading
+    })
+
 
     this.mesh = new THREE.Mesh(geometry, material)
     this.mesh.position.set(0, 0, 0)
