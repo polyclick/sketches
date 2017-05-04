@@ -20,7 +20,6 @@ class App {
     this.renderer = null
     this.camera = null
     this.scene = null
-    this.mesh = null
 
     this.gui = null
     this.noiseCanvas = null
@@ -356,10 +355,9 @@ class App {
     })
 
 
-    this.mesh = new THREE.Mesh(geometry, material)
-    this.mesh.position.set(0, 0, -5)
-    //this.mesh.rotation.y = Math.PI / 2
-    this.scene.add(this.mesh)
+    const mesh = new THREE.Mesh(geometry, material)
+    mesh.position.set(0, 0, -5)
+    this.scene.add(mesh)
 
 
     // Draw 2d noise debug
