@@ -39,9 +39,9 @@ class App {
       this.shapes = [].map.call(
         document.getElementsByClassName(`shapeshift`), element => new Shapeshift(element, {
           rings: 20,
-          anchors: 15,
-          length: 0.75,
-          minRingScale: 0.35
+          anchors: 18,
+          length: 1,
+          minRingScale: 0
         }
       ))
     }
