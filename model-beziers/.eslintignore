@@ -1,0 +1,7 @@
+dist/
+docs/
+gulp/
+src/config.js
+src/lib/
+gulpfile.js
+package.json
